@@ -1,4 +1,4 @@
-## StableCOin
+## StableCoin
 
 1. (Relative Stabiliy) Anchored or pegged -> USD $1.00
     1. Chainlink PriceFeed
