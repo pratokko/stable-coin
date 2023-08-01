@@ -347,4 +347,7 @@ contract DSCEngine is ReentrancyGuard {
     function getAccountInfomation(address user)external view  returns (uint256 totalDscMinted, uint256 collaterallValueInUsd) {
         (totalDscMinted, collaterallValueInUsd) = _getAccountInfomation(user); 
     }
+    function getCollateralTokens() external view returns(address[] memory) {
+        return s_collateralTokens;
+    }
 }
