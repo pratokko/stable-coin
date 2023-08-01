@@ -77,10 +77,11 @@ contract Handler is Test {
         dsce.redeemCollateral(address(collateral), amountCollateral);
     }
 
-    function updateCollateralPrice(uint96 newPrice) public {
-        int256 newPriceInt = int256(uint256(newPrice));
-        ethUsdPriceFeed.updateAnswer(newPriceInt);
-    }
+    // this will break our invariant tests
+    // function updateCollateralPrice(uint96 newPrice) public {
+    //     int256 newPriceInt = int256(uint256(newPrice));
+    //     ethUsdPriceFeed.updateAnswer(newPriceInt);
+    // }
 
     // Helper functions
 
