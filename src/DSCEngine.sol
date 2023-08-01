@@ -166,7 +166,7 @@ contract DSCEngine is ReentrancyGuard {
         moreThanZero(amountCollateral)
         nonReentrant
     {
-       _redeemCollateral(msg.sender, msg.sender, tokenCollateralAddress, amountCollateral );
+        _redeemCollateral(msg.sender, msg.sender, tokenCollateralAddress, amountCollateral);
         _revertIfhealthFactorIsBroken(msg.sender);
     }
 
@@ -188,7 +188,7 @@ contract DSCEngine is ReentrancyGuard {
     }
 
     function burnDsc(uint256 amount) public moreThanZero(amount) {
-       _burnDsc(amount, msg.sender, msg.sender);
+        _burnDsc(amount, msg.sender, msg.sender);
         _revertIfhealthFactorIsBroken(msg.sender); // i dont think this will ever hit
     }
 
@@ -232,16 +232,14 @@ contract DSCEngine is ReentrancyGuard {
         uint256 totalCollateralToRedeem = tokenAmountFromDebtCovered + bonusCollateral;
         _redeemCollateral(user, msg.sender, collateral, totalCollateralToRedeem);
         // we need to burn the dsc Now
-        _burnDsc(debtToCover, user, msg.sender );
+        _burnDsc(debtToCover, user, msg.sender);
 
         uint256 endingUserHealthFactor = _healthFactor(user);
 
-        if( endingUserHealthFactor <= startingUserHealthfactor) {
+        if (endingUserHealthFactor <= startingUserHealthfactor) {
             revert DSCEngine__HealthFactorNotImproved();
-
         }
         _revertIfhealthFactorIsBroken(msg.sender);
-
     }
 
     function gethealthFactor() external view {}
@@ -250,25 +248,21 @@ contract DSCEngine is ReentrancyGuard {
     /////Internal & Private View Functions  ///
     ///////////////////////////////////////////
 
-
     /**
      * @dev Low-level internal function , do not call unless the function calling it is chcking for health factors being broken
      */
 
     function _burnDsc(uint256 amountDscToBurn, address onBehalfOf, address dscFrom) private {
-         s_DSCMinted[onBehalfOf] -= amountDscToBurn;
+        s_DSCMinted[onBehalfOf] -= amountDscToBurn;
         bool success = i_dsc.transferFrom(dscFrom, address(this), amountDscToBurn);
 
         if (!success) {
             revert DSCEngine__TransferFailed();
         }
         i_dsc.burn(amountDscToBurn);
-
     }
 
-
-
-    function _redeemCollateral( address from, address to,address tokenCollateralAddress, uint256 amountCollateral )
+    function _redeemCollateral(address from, address to, address tokenCollateralAddress, uint256 amountCollateral)
         private
     {
         s_collateralDeposited[from][tokenCollateralAddress] -= amountCollateral;
@@ -348,5 +342,9 @@ contract DSCEngine is ReentrancyGuard {
         //  The returned value from CL will be 1000 * 1e8
 
         return ((uint256(price) * ADDITIONAL_FEED_PRECISION) * amount) / PRECISION; // (1000 * 1e8 * (1e10)) * 1000 * 1e18
+    }
+
+    function getAccountInfomation(address user)external view  returns (uint256 totalDscMinted, uint256 collaterallValueInUsd) {
+        (totalDscMinted, collaterallValueInUsd) = _getAccountInfomation(user); 
     }
 }
