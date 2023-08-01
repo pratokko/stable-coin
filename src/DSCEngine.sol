@@ -43,8 +43,8 @@ contract DSCEngine is ReentrancyGuard {
     uint256 private constant ADDITIONAL_FEED_PRECISION = 1e10;
     uint256 private constant PRECISION = 1e18;
     uint256 private constant LIQUIDATION_THRESHOLD = 50; // 200% overcollateralized
-    uint256 private constant LIQUIDATION_PRECISION = 100; 
-    uint256 private constant MIN_HEALTH_FACTOR = 1; 
+    uint256 private constant LIQUIDATION_PRECISION = 100;
+    uint256 private constant MIN_HEALTH_FACTOR = 1;
 
     mapping(address token => address priceFeed) private s_priceFeeds;
     mapping(address user => mapping(address token => uint256 amount)) private s_collateralDeposited;
@@ -100,7 +100,22 @@ contract DSCEngine is ReentrancyGuard {
     /////External Functions  ///
     ////////////////////////////
 
-    function depositCollateralAndMintDsc() external {}
+    /**
+     *
+     * @param tokenCollateralAddress This is the address of the token to deposit as collateral
+     * @param amountCollateral This is the amount of collateral to deposit
+     * @param amountDscToMint This is the amount of decentralized stablecoin to mint
+     * @notice This function will deposit collateral and mint dsc in one transaction
+     */
+
+    function depositCollateralAndMintDsc(
+        address tokenCollateralAddress,
+        uint256 amountCollateral,
+        uint256 amountDscToMint
+    ) external {
+        depositCollateral(tokenCollateralAddress, amountCollateral);
+        mintDsc(amountDscToMint);
+    }
 
     /*
      * @param tokenCollateralAddress The address of the token to deposit the collateral
@@ -108,7 +123,7 @@ contract DSCEngine is ReentrancyGuard {
      */
 
     function depositCollateral(address tokenCollateralAddress, uint256 amountCollateral)
-        external
+        public
         moreThanZero(amountCollateral)
         isAllowedToken(tokenCollateralAddress)
         nonReentrant
@@ -131,13 +146,13 @@ contract DSCEngine is ReentrancyGuard {
      * @notice they must have more collateral than the minimum threshold
      */
 
-    function mintDsc(uint256 amountDscToMint) external moreThanZero(amountDscToMint) nonReentrant {
+    function mintDsc(uint256 amountDscToMint) public moreThanZero(amountDscToMint) nonReentrant {
         s_DSCMinted[msg.sender] += amountDscToMint;
         // if they minted too much ($150 DSC, $100 ETH)
         _revertIfhealthFactorIsBroken(msg.sender);
 
         bool minted = i_dsc.mint(msg.sender, amountDscToMint);
-        if(!minted) {
+        if (!minted) {
             revert DSCEngine__MintFailed();
         }
     }
@@ -178,12 +193,12 @@ contract DSCEngine is ReentrancyGuard {
         // return (collateralValueInUsd / totalDscMinted);
     }
 
-        // 1. Check health factor ( do they have enough collateral?)
-        // 2. revert if they dont have a good  health factor
+    // 1. Check health factor ( do they have enough collateral?)
+    // 2. revert if they dont have a good  health factor
     function _revertIfhealthFactorIsBroken(address user) internal view {
         uint256 userHealthFactor = _healthFactor(user);
 
-        if(userHealthFactor < MIN_HEALTH_FACTOR) {
+        if (userHealthFactor < MIN_HEALTH_FACTOR) {
             revert DSCEngine__BreaksHealthFactor(userHealthFactor);
         }
     }
