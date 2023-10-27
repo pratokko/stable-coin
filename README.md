@@ -10,3 +10,4 @@
     2. wBTC
 
 
+still more work to do on the test files and better readme functionality of the stable coin working as expected please note that this stable coin is not yet tested
